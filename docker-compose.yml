@@ -17,6 +17,12 @@ x-yandex-env: &yandex-env
   YS3_REGION      : ${YS3_REGION}
   YS3_ENDPOINT    : ${YS3_ENDPOINT}
 
+x-google-env: &google-env
+  GCP_ACCESS_KEY :  ${GCP_ACCESS_KEY}  
+  GCP_SECRET_KEY :  ${GCP_SECRET_KEY}  
+  GCP_REGION     :  ${GCP_REGION    }
+  GCP_ENDPOINT   :  ${GCP_ENDPOINT  }
+
 services:
 
   # MinIO для объектного хранилища
@@ -89,7 +95,7 @@ services:
     container_name: trin
     environment:
       TZ: Europe/Moscow  
-      <<: [*minio-env,*mdb-env, *aws-env, *yandex-env]
+      <<: [*minio-env,*mdb-env, *aws-env, *yandex-env, *google-env]
 
     depends_on:
       # - metastore

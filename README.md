@@ -1,3 +1,21 @@
+https://trino.io/docs/current/object-storage/metastores.html#iceberg-jdbc-catalog:~:text=view%20management.-,JDBC%20catalog,-%23
+
+- The Iceberg JDBC catalog is supported for the Iceberg connector. At a minimum, iceberg.jdbc-catalog.driver-class, iceberg.jdbc-catalog.connection-url, iceberg.jdbc-catalog.default-warehouse-dir, and iceberg.jdbc-catalog.catalog-name must be configured. When using any database besides PostgreSQL, a JDBC driver jar file must be placed in the plugin directory.
+
+The following example shows a minimal catalog configuration using an Iceberg JDBC metadata catalog:
+```
+connector.name=iceberg
+iceberg.catalog.type=jdbc
+iceberg.jdbc-catalog.catalog-name=test
+iceberg.jdbc-catalog.driver-class=org.postgresql.Driver
+iceberg.jdbc-catalog.connection-url=jdbc:postgresql://example.net:5432/database
+iceberg.jdbc-catalog.connection-user=admin
+iceberg.jdbc-catalog.connection-password=test
+iceberg.jdbc-catalog.default-warehouse-dir=s3://bucket
+```
+
+
+
 schematool -dbType postgres -info
 
 
