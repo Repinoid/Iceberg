@@ -83,7 +83,7 @@ services:
     container_name: trin
     environment:
       TZ: Europe/Moscow  
-      <<: [*minio-env,*mdb-env, x-aws-env]
+      <<: [*minio-env,*mdb-env, *aws-env]
 
     depends_on:
       # - metastore

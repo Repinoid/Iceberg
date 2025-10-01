@@ -86,6 +86,15 @@ WITH (
 AS SELECT * FROM tpch.tiny.customer limit 10;
 ```
 
+CREATE TABLE aws3.minia.client
+WITH (
+    format = 'ORC',
+    location = 's3a://awstrino/customer/'
+) 
+AS SELECT * FROM tpch.tiny.customer limit 10;
+
+
+
 ### Откроем второе окно с командной строкой и войдём в контейнер metastore-db
 - docker exec -it metastore-db /bin/bash
 - Вход в CLI БД
