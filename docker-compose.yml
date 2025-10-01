@@ -20,8 +20,8 @@ x-yandex-env: &yandex-env
 x-google-env: &google-env
   GCP_ACCESS_KEY :  ${GCP_ACCESS_KEY}  
   GCP_SECRET_KEY :  ${GCP_SECRET_KEY}  
-  GCP_REGION     :  ${GCP_REGION    }
-  GCP_ENDPOINT   :  ${GCP_ENDPOINT  }
+  GCP_REGION     :  ${GCP_REGION}
+  GCP_ENDPOINT   :  ${GCP_ENDPOINT}
 
 services:
 
@@ -104,6 +104,7 @@ services:
       - "8080:8080"  # Trino UI
     volumes:
       - ./etc:/etc/trino  # Каталог с конфигурацией Trino (catalog.properties, etc.)
+      - ./google.json:/etc/trino/google.json
     networks:
       - trino-network
 

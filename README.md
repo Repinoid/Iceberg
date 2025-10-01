@@ -14,6 +14,13 @@ iceberg.jdbc-catalog.connection-password=test
 iceberg.jdbc-catalog.default-warehouse-dir=s3://bucket
 ```
 
+CREATE TABLE google.mini.client
+    -> WITH (
+    ->     format = 'ORC',
+    ->     location = 'gs://triner/customer/'
+    -> ) 
+    -> AS SELECT * FROM tpch.tiny.customer limit 10;
+
 
 
 schematool -dbType postgres -info
@@ -81,6 +88,17 @@ check out the example project from Brian Olsen.
 
 ### Создание schema в каталоге minio_catalog
 ```
+CREATE SCHEMA google.mini WITH (location = 's3a://triner/');
+
+CREATE TABLE google.mini.client
+WITH (
+    format = 'ORC',
+    location = 's3a://triner/customer/'
+) 
+AS SELECT * FROM tpch.tiny.customer limit 10;
+
+
+
 CREATE SCHEMA minio_catalog.mini WITH (location = 's3a://tiny/');
 
 CREATE SCHEMA ycs3.mini WITH (location = 's3a://ycstrino/');
