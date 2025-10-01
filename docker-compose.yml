@@ -1,0 +1,100 @@
+x-minio-env: &minio-env
+  MINIO_ROOT_USER:      ${MINIO_USER}
+  MINIO_ROOT_PASSWORD:  ${MINIO_PASSWORD}
+
+x-mdb-env: &mdb-env
+  POSTGRES_USER:      ${MDB_USER}
+  POSTGRES_PASSWORD:  ${MDB_PASSWORD}
+
+
+services:
+
+  # MinIO для объектного хранилища
+  minio-service:
+    image: quay.io/minio/minio:latest
+    container_name: minio-container
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # Web Console
+    environment:
+      <<: *minio-env
+      TZ: Europe/Moscow
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - trino-network
+
+  # Автоматическое создание бакетов в MinIO
+  createbuckets-service:
+    image: quay.io/minio/mc:latest
+    container_name: create-minio-buckets
+    environment:
+      TZ: Europe/Moscow    
+    depends_on:
+      - minio-service
+    restart: on-failure
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set localminio http://minio-service:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+      /usr/bin/mc mb localminio/tiny;
+      /usr/bin/mc mb localminio/trinod;
+      exit 0;
+      "
+    networks:
+      - trino-network
+
+  # PostgreSQL для Metastore
+  metastore-db:
+    image: postgres:17
+    container_name: metastore-db
+    environment:
+      TZ:                 Europe/Moscow
+      POSTGRES_DB:        metastore
+      <<: *mdb-env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgresql/postgresql.conf:/etc/postgresql.conf
+      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf
+      - ./iceberg-setup.sql:/docker-entrypoint-initdb.d/iceberg-setup.sql
+
+      - ./pg_logs:/var/log/postgresql
+
+    command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf      
+    # command: bash -c 'chown -R postgres:postgres /var/log/postgresql && exec postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf'    
+
+    networks:
+      - trino-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MDB_USER} -d metastore"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # Trino coordinator
+  trin:
+    image: trinodb/trino:latest
+    container_name: trin
+    environment:
+      TZ: Europe/Moscow  
+      <<: [*minio-env,*mdb-env]
+
+    depends_on:
+      # - metastore
+      - minio-service
+    ports:
+      - "8080:8080"  # Trino UI
+    volumes:
+      - ./etc:/etc/trino  # Каталог с конфигурацией Trino (catalog.properties, etc.)
+    networks:
+      - trino-network
+
+volumes:
+  minio_data:
+  postgres_data:
+
+networks:
+  trino-network:
+    driver: bridge
