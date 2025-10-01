@@ -6,6 +6,10 @@ x-mdb-env: &mdb-env
   POSTGRES_USER:      ${MDB_USER}
   POSTGRES_PASSWORD:  ${MDB_PASSWORD}
 
+x-aws-env: &aws-env
+  AWS_ACCESS_KEY_ID:  ${AWS3_ACCESS_KEY}
+  AWS_SECRET_KEY:     ${AWS3_SECRET_KEY}
+  AWS3_REGION:        ${AWS3_REGION}
 
 services:
 
@@ -79,7 +83,7 @@ services:
     container_name: trin
     environment:
       TZ: Europe/Moscow  
-      <<: [*minio-env,*mdb-env]
+      <<: [*minio-env,*mdb-env, x-aws-env]
 
     depends_on:
       # - metastore
