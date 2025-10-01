@@ -11,6 +11,12 @@ x-aws-env: &aws-env
   AWS_SECRET_KEY:     ${AWS3_SECRET_KEY}
   AWS3_REGION:        ${AWS3_REGION}
 
+x-yandex-env: &yandex-env
+  YS3_ACCESS_KEY  : ${YS3_ACCESS_KEY}
+  YS3_SECRET_KEY  : ${YS3_SECRET_KEY}
+  YS3_REGION      : ${YS3_REGION}
+  YS3_ENDPOINT    : ${YS3_ENDPOINT}
+
 services:
 
   # MinIO для объектного хранилища
@@ -83,7 +89,7 @@ services:
     container_name: trin
     environment:
       TZ: Europe/Moscow  
-      <<: [*minio-env,*mdb-env, *aws-env]
+      <<: [*minio-env,*mdb-env, *aws-env, *yandex-env]
 
     depends_on:
       # - metastore

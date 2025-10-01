@@ -64,6 +64,18 @@ check out the example project from Brian Olsen.
 ### Создание schema в каталоге minio_catalog
 ```
 CREATE SCHEMA minio_catalog.mini WITH (location = 's3a://tiny/');
+
+CREATE SCHEMA ycs3.mini WITH (location = 's3a://ycstrino/');
+
+CREATE TABLE ycs3.mini.client
+WITH (
+    format = 'ORC',
+    location = 's3a://ycstrino/customer/'
+) 
+AS SELECT * FROM tpch.tiny.customer limit 10;
+```
+
+
 ```
 `s3a://tiny/` - это бакет в минио, создан контейнером ***createbuckets-service*** при запуске docker compose<br>
 Удостоверяемся:
