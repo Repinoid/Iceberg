@@ -1,3 +1,5 @@
+**[Telegram IBM2702]  (https://t.me/IBM2702)**
+
 # Data Lake House
 
 ## Trino & Apache Iceberg & Metastore on postgres:17
@@ -96,5 +98,6 @@ AS SELECT * FROM minio.mini.client;
 ```
 
 и т.д.
+Ps Формат для google cloud `gs://triner`
 
 <hr>
