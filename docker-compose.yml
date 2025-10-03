@@ -9,8 +9,8 @@ x-minio-env: &minio-env
   MINIO_ROOT_PASSWORD:  ${MINIO_PASSWORD}
 
 x-mdb-env: &mdb-env
-  POSTGRES_USER:      ${MDB_USER}
-  POSTGRES_PASSWORD:  ${MDB_PASSWORD}
+  MDB_USER:      ${MDB_USER}
+  MDB_PASSWORD:  ${MDB_PASSWORD}
 
 x-aws-env: &aws-env
   AWS_ACCESS_KEY_ID:  ${AWS3_ACCESS_KEY}
@@ -35,7 +35,11 @@ services:
     image: postgres:17
     container_name: dbcont
     environment:
-      <<: *pg-env
+      # <<: *pg-env
+      #  postgres - Username & passowоrd передаются через POSTGRES_USER & POSTGRES_PASSWORD 
+      POSTGRES_USER     :  ${DB_USER}
+      POSTGRES_PASSWORD :  ${DB_PASSWORD}
+      POSTGRES_DB       :  ${DB_NAME}
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./pg_logs:/var/log/postgresql
@@ -48,7 +52,7 @@ services:
     networks:
       - trino-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_PASSWORD}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -94,9 +98,10 @@ services:
     image: postgres:17
     container_name: metastore-db
     environment:
-      TZ:                 Europe/Moscow
-      POSTGRES_DB:        metastore
-      <<: *mdb-env
+      TZ                :  Europe/Moscow
+      POSTGRES_DB       :  metastore
+      POSTGRES_USER     :  ${MDB_USER}
+      POSTGRES_PASSWORD :  ${MDB_PASSWORD}
     volumes:
       - pg_meta_data:/var/lib/postgresql/data
       - ./postgresql/pg_metastore.conf:/etc/postgresql.conf:ro
