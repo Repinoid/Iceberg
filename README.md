@@ -22,6 +22,26 @@ CREATE TABLE google.mini.client
     -> AS SELECT * FROM tpch.tiny.customer limit 10;
 
 
+- *trino>* `help;`
+```
+Supported commands:
+QUIT
+EXIT
+CLEAR
+EXPLAIN [ ( option [, ...] ) ] <query>
+    options: FORMAT { TEXT | GRAPHVIZ | JSON }
+             TYPE { LOGICAL | DISTRIBUTED | VALIDATE | IO }
+DESCRIBE <table>
+SHOW COLUMNS FROM <table>
+SHOW FUNCTIONS
+SHOW CATALOGS [LIKE <pattern>]
+SHOW SCHEMAS [FROM <catalog>] [LIKE <pattern>]
+SHOW TABLES [FROM <schema>] [LIKE <pattern>]
+USE [<catalog>.]<schema>
+```
+
+
+
 
 schematool -dbType postgres -info
 

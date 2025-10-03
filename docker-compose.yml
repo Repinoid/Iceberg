@@ -37,18 +37,18 @@ services:
     environment:
       <<: *pg-env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
       - ./pg_logs:/var/log/postgresql
-      - ./postgresql/postgresql.conf:/etc/postgresql.conf
-      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf
+      - ./postgresql/pg.conf:/etc/postgresql.conf:ro
+      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf:ro
     command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf
     ports:
       - "5432:5432"
     restart: unless-stopped
     networks:
-      - localnet
+      - trino-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-usera} -d ${DB_NAME:-dbname}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -98,15 +98,14 @@ services:
       POSTGRES_DB:        metastore
       <<: *mdb-env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./postgresql/postgresql.conf:/etc/postgresql.conf
-      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf
-      - ./iceberg-setup.sql:/docker-entrypoint-initdb.d/iceberg-setup.sql
+      - pg_meta_data:/var/lib/postgresql/data
+      - ./postgresql/pg_metastore.conf:/etc/postgresql.conf:ro
+      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf:ro
+      - ./iceberg-setup.sql:/docker-entrypoint-initdb.d/iceberg-setup.sql:ro
 
       - ./pg_logs:/var/log/postgresql
 
     command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf      
-    # command: bash -c 'chown -R postgres:postgres /var/log/postgresql && exec postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf'    
 
     networks:
       - trino-network
@@ -114,8 +113,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${MDB_USER} -d metastore"]
       interval: 5s
       timeout: 5s
-      retries: 10
-      start_period: 10s
+      retries: 20
+      start_period: 20s
 
   # Trino coordinator
   trin:
@@ -138,7 +137,8 @@ services:
 
 volumes:
   minio_data:
-  postgres_data:
+  pg_data:
+  pg_meta_data:
 
 networks:
   trino-network:
