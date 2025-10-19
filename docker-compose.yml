@@ -33,12 +33,12 @@ services:
       POSTGRES_USER     :  ${MDB_USER}
       POSTGRES_PASSWORD :  ${MDB_PASSWORD}
     volumes:
-      - pg_meta_data:/var/lib/postgresql/data
-      - ./postgresql/pg_metastore.conf:/etc/postgresql.conf:ro
-      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf:ro
+      # - pg_meta_data:/var/lib/postgresql/data
+      # - ./postgresql/pg_metastore.conf:/etc/postgresql.conf:ro
+      # - ./postgresql/pg_hba.conf:/etc/pg_hba.conf:ro
       - ./iceberg-setup.sql:/docker-entrypoint-initdb.d/iceberg-setup.sql:ro
 
-      - ./pg_logs:/var/log/postgresql
+      # - ./pg_logs:/var/log/postgresql
 
     command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf      
 
