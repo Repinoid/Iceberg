@@ -87,12 +87,16 @@ AS SELECT * FROM tpch.tiny.customer limit 10;
 ```
 В Yandex Cloud - создаём схему `maxi`
 - `CREATE SCHEMA ycs3.maxi WITH (location = 's3a://ycstrino/');`
+
+
+- `CREATE SCHEMA nubes.buck WITH (location = 's3a://newbuck/');`
+
 - В схеме `maxi` каталога `ycs3` создаём таблицу `people` - копию таблицы `minio.mini.client`
 ```
-CREATE TABLE ycs3.maxi.people
+CREATE TABLE nubes.buck.people
 WITH (
     format = 'ORC',
-    location = 's3a://ycstrino/customerqwer/'
+    location = 's3a://newbuck/customer/'
 ) 
 AS SELECT * FROM tpch.tiny.customer limit 10;
 ```
