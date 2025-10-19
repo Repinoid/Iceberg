@@ -13,6 +13,12 @@ x-yandex-env: &yandex-env
   YS3_REGION      : ${YS3_REGION}
   YS3_ENDPOINT    : ${YS3_ENDPOINT}
 
+x-nubes-env: &nubes-env
+  YS3_ACCESS_KEY  : ${NUBES_ACCESS_KEY}
+  YS3_SECRET_KEY  : ${NUBES_SECRET_KEY}
+  YS3_REGION      : ${NUBES_REGION}
+  YS3_ENDPOINT    : ${NUBES_ENDPOINT}
+
 services:
 
   # PostgreSQL для Metastore
@@ -51,7 +57,7 @@ services:
     container_name: trin
     environment:
       TZ: Europe/Moscow  
-      <<: [*mdb-env, *aws-env, *yandex-env]
+      <<: [*mdb-env, *aws-env, *yandex-env, *nubes-env]
 
     depends_on:
       - metastore-db

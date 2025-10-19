@@ -73,8 +73,8 @@ USE [<catalog>.]<schema>
 Далее ... 
 *удобнее/нагляднее в DBeaver но можно из хоста в CLI Trino* 
 
-В Minio - создаём схему `mini`
-- `CREATE SCHEMA minio.mini WITH (location = 's3a://tiny/');`
+
+- `CREATE SCHEMA ycs3.mini WITH (location = 's3a:///');`
 
 - В схеме `mini` каталога `minio` создаём таблицу `client` - копию первых 10 строк таблицы `tpch.tiny.customer`
 ```
@@ -89,12 +89,12 @@ AS SELECT * FROM tpch.tiny.customer limit 10;
 - `CREATE SCHEMA ycs3.maxi WITH (location = 's3a://ycstrino/');`
 - В схеме `maxi` каталога `ycs3` создаём таблицу `people` - копию таблицы `minio.mini.client`
 ```
-CREATE TABLE minio.mini.people
+CREATE TABLE ycs3.maxi.people
 WITH (
     format = 'ORC',
-    location = 's3a://tiny/customer/'
+    location = 's3a://ycstrino/customerqwer/'
 ) 
-AS SELECT * FROM minio.mini.client;
+AS SELECT * FROM tpch.tiny.customer limit 10;
 ```
 
 и т.д.
