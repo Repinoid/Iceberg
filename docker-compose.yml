@@ -1,13 +1,4 @@
 
-x-postgres-env: &pg-env
-  DB_USER       :   ${DB_USER}
-  DB_PASSWORD   :   ${DB_PASSWORD}
-  DB_NAME       :   ${DB_NAME}
-
-x-minio-env: &minio-env
-  MINIO_ROOT_USER:      ${MINIO_USER}
-  MINIO_ROOT_PASSWORD:  ${MINIO_PASSWORD}
-
 x-mdb-env: &mdb-env
   MDB_USER:      ${MDB_USER}
   MDB_PASSWORD:  ${MDB_PASSWORD}
@@ -31,69 +22,8 @@ x-google-env: &google-env
 
 services:
 
-  db:
-    image: postgres:17
-    container_name: dbcont
-    environment:
-      # <<: *pg-env
-      #  postgres - Username & passowоrd передаются через POSTGRES_USER & POSTGRES_PASSWORD 
-      POSTGRES_USER     :  ${DB_USER}
-      POSTGRES_PASSWORD :  ${DB_PASSWORD}
-      POSTGRES_DB       :  ${DB_NAME}
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-      - ./pg_logs:/var/log/postgresql
-      - ./postgresql/pg.conf:/etc/postgresql.conf:ro
-      - ./postgresql/pg_hba.conf:/etc/pg_hba.conf:ro
-    command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
-    networks:
-      - trino-network
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_PASSWORD}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
-  # MinIO для объектного хранилища
-  minio-service:
-    image: quay.io/minio/minio:latest
-    container_name: minio-container
-    ports:
-      - "9000:9000"  # S3 API
-      - "9001:9001"  # Web Console
-    environment:
-      <<: *minio-env
-      TZ: Europe/Moscow
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-    networks:
-      - trino-network
-
-  # Автоматическое создание бакетов в MinIO
-  createbuckets-service:
-    image: quay.io/minio/mc:latest
-    container_name: create-minio-buckets
-    environment:
-      TZ: Europe/Moscow    
-    depends_on:
-      - minio-service
-    restart: on-failure
-    entrypoint: >
-      /bin/sh -c "
-      sleep 5;
-      /usr/bin/mc alias set localminio http://minio-service:9000 ${MINIO_USER} ${MINIO_PASSWORD};
-      /usr/bin/mc mb localminio/tiny;
-      /usr/bin/mc mb localminio/trinod;
-      exit 0;
-      "
-    networks:
-      - trino-network
-
-  # PostgreSQL для Metastore
+    # PostgreSQL для Metastore
   metastore-db:
     image: postgres:17
     container_name: metastore-db
@@ -127,7 +57,7 @@ services:
     container_name: trin
     environment:
       TZ: Europe/Moscow  
-      <<: [*pg-env, *minio-env, *mdb-env, *aws-env, *yandex-env, *google-env]
+      <<: [*mdb-env, *aws-env, *yandex-env, *google-env]
 
     depends_on:
       # - metastore
