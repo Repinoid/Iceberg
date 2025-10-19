@@ -1,51 +1,42 @@
-
 x-mdb-env: &mdb-env
-  MDB_USER:      ${MDB_USER}
-  MDB_PASSWORD:  ${MDB_PASSWORD}
+  MDB_USER: ${MDB_USER}
+  MDB_PASSWORD: ${MDB_PASSWORD}
 
 x-aws-env: &aws-env
-  AWS_ACCESS_KEY_ID:  ${AWS3_ACCESS_KEY}
-  AWS_SECRET_KEY:     ${AWS3_SECRET_KEY}
-  AWS3_REGION:        ${AWS3_REGION}
+  AWS_ACCESS_KEY_ID: ${AWS3_ACCESS_KEY}
+  AWS_SECRET_KEY: ${AWS3_SECRET_KEY}
+  AWS3_REGION: ${AWS3_REGION}
 
 x-yandex-env: &yandex-env
-  YS3_ACCESS_KEY  : ${YS3_ACCESS_KEY}
-  YS3_SECRET_KEY  : ${YS3_SECRET_KEY}
-  YS3_REGION      : ${YS3_REGION}
-  YS3_ENDPOINT    : ${YS3_ENDPOINT}
-
-x-google-env: &google-env
-  GCP_ACCESS_KEY :  ${GCP_ACCESS_KEY}  
-  GCP_SECRET_KEY :  ${GCP_SECRET_KEY}  
-  GCP_REGION     :  ${GCP_REGION}
-  GCP_ENDPOINT   :  ${GCP_ENDPOINT}
+  YS3_ACCESS_KEY: ${YS3_ACCESS_KEY}
+  YS3_SECRET_KEY: ${YS3_SECRET_KEY}
+  YS3_REGION: ${YS3_REGION}
+  YS3_ENDPOINT: ${YS3_ENDPOINT}
 
 services:
 
-
-    # PostgreSQL для Metastore
+  # PostgreSQL для Metastore
   metastore-db:
     image: postgres:17
     container_name: metastore-db
     environment:
-      TZ                :  Europe/Moscow
-      POSTGRES_DB       :  metastore
-      POSTGRES_USER     :  ${MDB_USER}
-      POSTGRES_PASSWORD :  ${MDB_PASSWORD}
+      TZ: Europe/Moscow
+      POSTGRES_DB: metastore
+      POSTGRES_USER: ${MDB_USER}
+      POSTGRES_PASSWORD: ${MDB_PASSWORD}
     volumes:
       # - pg_meta_data:/var/lib/postgresql/data
       # - ./postgresql/pg_metastore.conf:/etc/postgresql.conf:ro
       # - ./postgresql/pg_hba.conf:/etc/pg_hba.conf:ro
       - ./iceberg-setup.sql:/docker-entrypoint-initdb.d/iceberg-setup.sql:ro
-
       # - ./pg_logs:/var/log/postgresql
 
-    command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf      
+    command: postgres -c config_file=/etc/postgresql.conf -c hba_file=/etc/pg_hba.conf
 
     networks:
       - trino-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${MDB_USER} -d metastore"]
+      test: [ "CMD-SHELL", "pg_isready -U ${MDB_USER} -d metastore" ]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -56,16 +47,15 @@ services:
     image: trinodb/trino:latest
     container_name: trin
     environment:
-      TZ: Europe/Moscow  
-      <<: [*mdb-env, *aws-env, *yandex-env, *google-env]
+      TZ: Europe/Moscow
+      <<: [ *mdb-env, *aws-env, *yandex-env ]
 
     depends_on:
-      # - metastore
-      - minio-service
+      - metastore-db
     ports:
-      - "8080:8080"  # Trino UI
+      - "8080:8080" # Trino UI
     volumes:
-      - ./etc:/etc/trino  # Каталог с конфигурацией Trino (catalog.properties, etc.)
+      - ./etc:/etc/trino # Каталог с конфигурацией Trino (catalog.properties, etc.)
       - ./google.json:/etc/trino/google.json
     networks:
       - trino-network
@@ -74,6 +64,7 @@ volumes:
   minio_data:
   pg_data:
   pg_meta_data:
+
 
 networks:
   trino-network:
